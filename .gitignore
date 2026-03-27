@@ -1,0 +1,12 @@
+## Data artifacts (do not commit)
+/data/data_zeamap/KW/embeddings.pkl
+
+# Optional: ignore all phenotype embeddings files
+/data/data_zeamap/*/embeddings.pkl
+
+## Python cache files (do not commit)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+

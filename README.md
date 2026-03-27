@@ -10,7 +10,7 @@ Epiformer is a PyTorch-based deep learning framework for **epistasis detection**
 
 ### Framework
 
-![Epiformer framework](data/Epiformer.png)
+![Epiformer framework](result/KW/Epiformer.png)
 
 ---
 
