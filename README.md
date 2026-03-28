@@ -58,7 +58,7 @@ where `<phe>` is the phenotype name (e.g., `KW`). The directory should contain a
 - `SNP_annotation.csv`
 - `yData.csv`
 
-> Dataset download link / DOI: (please fill in)
+> Dataset download link / DOI: (https://doi.org/10.6084/m9.figshare.30448166)
 
 ---
 
