@@ -172,14 +172,25 @@ Default output file:
 
 ---
 
+### Citation
+
+If you use Epiformer in your research, please cite:
+
+> Zhang, X., Liu, L., Ren, L. et al. Epiformer: epistasis detection by genome language model and dual-channel network. *Genome Biology* (2026). https://doi.org/10.1186/s13059-026-04268-8
+
+- Paper: https://link.springer.com/article/10.1186/s13059-026-04268-8
+- DOI: https://doi.org/10.1186/s13059-026-04268-8
+
+---
+
 ### Contact
 
 - **Issues / Bugs**: please submit via repository Issues (include error logs, commands, environment info, and reproduction steps).
 - **Email**: `<zhangxiaowei2118@gmail.com>`
-<!-- - **Paper link / project page (optional)**: `<your-paper-or-homepage>` -->
+- **Paper**: https://link.springer.com/article/10.1186/s13059-026-04268-8
 
 
-<!-- ## 中文说明（保留）
+## 中文说明
 
 Epiformer 是一个基于 PyTorch 的深度学习框架，利用基因组语言模型EVO2和双通网络进行上位性检测和表型预测。核心模型将：
 
@@ -191,7 +202,7 @@ Epiformer 是一个基于 PyTorch 的深度学习框架，利用基因组语言�
 
 ## 模型框架示意图
 
-![Epiformer framework](data/Epiformer.png)
+![Epiformer framework](result/KW/Epiformer.png)
 
 ---
 
@@ -240,7 +251,7 @@ pip install torch numpy pandas scikit-learn
 - `yData.csv`
 
 ---
-其中论文使用到的原始数据可以从（此处补充下载链接/DOI）获取。
+其中论文使用到的原始数据可以从 https://doi.org/10.6084/m9.figshare.30448166 获取。
 
 ---
 
@@ -350,8 +361,19 @@ python attention_weight_epi.py
 
 ---
 
+## 引用
+
+如果本工作对您有帮助，请引用：
+
+> Zhang, X., Liu, L., Ren, L. et al. Epiformer: epistasis detection by genome language model and dual-channel network. *Genome Biology* (2026). https://doi.org/10.1186/s13059-026-04268-8
+
+- 论文链接：https://link.springer.com/article/10.1186/s13059-026-04268-8
+- DOI：https://doi.org/10.1186/s13059-026-04268-8
+
+---
+
 ## 联系方式
 
 - **问题反馈 / Bug**：请优先通过仓库的 Issue 提交（建议附上报错信息、运行命令、环境信息与可复现步骤）。
 - **邮件**：`<zhangxiaowei2118@gmail.com>`
-<!-- - **论文链接**：`<your-homepage-or-lab-website>`（可留空） -->
+- **论文**：https://link.springer.com/article/10.1186/s13059-026-04268-8
