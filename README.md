@@ -163,6 +163,9 @@ Default output file:
 2. **Reproducibility**  
    A fixed seed is set (`set_seed(42)`), but small variations may still occur across hardware / library versions.
 
+3. **SNP contextual embeddings (Evo 2)**  
+   Due to differences across experimental environments, we recommend that users use **Evo 2** to re-embed the contextual sequence around each SNP (typically 10 bp upstream and 10 bp downstream, plus the SNP itself), then save the resulting embeddings as `embeddings.pkl` under `demo_data/data_zeamap/<phe>/` before training or inference.
+
 ---
 
 ### Contact
