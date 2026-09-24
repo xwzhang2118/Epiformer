@@ -19,8 +19,8 @@ Epiformer is a PyTorch-based deep learning framework for **epistasis detection**
 - `Epiformer.py`  
   Main training script. Runs 5-fold cross-validation, selects and saves the best model by PCC (Pearson correlation coefficient).
 
-- `attention_weight_singleloci.py`  
-  Extracts single-locus attention signals (from the `CNN_self_attention` branch) and exports averaged feature weights.
+- `singleloci_ importance.py`  
+  Extracts single-locus (per-SNP) importance scores (from the `CNN_self_attention` branch) and exports averaged feature weights.
 
 - `attention_weight_epi.py`  
   Extracts SNP–SNP interaction attention matrices (from the Transformer branch) and exports an averaged attention matrix.
@@ -49,7 +49,7 @@ pip install torch numpy pandas scikit-learn
 
 By default, scripts read data from the following directory (relative to the project root):
 
-`data/data_zeamap/<phe>/`
+`demo_data/data_zeamap/<phe>/`
 
 where `<phe>` is the phenotype name (e.g., `KW`). The directory should contain at least:
 
@@ -77,7 +77,7 @@ python Epiformer.py --phe KW
 
 `Epiformer.py` supports CLI arguments. If `--data_dir/--result_dir` are not provided, it uses:
 
-- Data dir: `<project_root>/data/data_zeamap/<phe>/`
+- Data dir: `<project_root>/demo_data/data_zeamap/<phe>/`
 - Result dir: `<project_root>/result/<phe>/`
 
 #### Training procedure (`Epiformer.py`)
@@ -103,21 +103,21 @@ python Epiformer.py --phe KW
 
 ---
 
-### Extract single-locus attention (single-loci)
+### Extract single-locus importance 
 
 ```bash
-python attention_weight_singleloci.py
+python "singleloci_ importance.py"
 ```
 
 #### What it does
 
 - Loads a trained model checkpoint (default: fold 1)
-- Runs a forward pass and extracts attention-related outputs from `CNN_self_attention`
-- Computes averaged feature weights and exports to CSV
+- Extracts single-locus (per-SNP) importance scores from the local `CNN_self_attention` branch
+- Averages scores across samples and exports one importance value per SNP to CSV
 
 #### Default inputs/outputs (current script behavior)
 
-**Important**: `attention_weight_singleloci.py` currently hard-codes the following in `main`:
+**Important**: `singleloci_ importance.py` currently hard-codes the following in `main`:
 
 - `args.phe = "KW/"`
 - `args.result_dir = "result/KW"`
@@ -157,34 +157,13 @@ Default output file:
 
 ### FAQ / Notes
 
-1. **Paths**  
-   - `Epiformer.py` uses project-relative paths (`data/` and `result/`) and supports overriding via `--data_dir/--result_dir`.
-   - The two attention scripts still contain **hard-coded** paths/phenotype (see above). To make CLI args effective, remove those `args.phe = "KW/"` assignments.
-
-2. **Argument overriding**  
-   CLI args work for `Epiformer.py`. However, `attention_weight_singleloci.py` / `attention_weight_epi.py` override `argparse` values in `main`, so passing args from command line currently has no effect.
-
-3. **CUDA / CPU**  
+1. **CUDA / CPU**  
    The code automatically selects `cuda:0` if available; otherwise it falls back to CPU (slower).
 
-4. **Reproducibility**  
+2. **Reproducibility**  
    A fixed seed is set (`set_seed(42)`), but small variations may still occur across hardware / library versions.
 
 ---
 
-### Citation
-
-If you use Epiformer in your research, please cite:
-
-> Zhang, X., Liu, L., Ren, L. et al. Epiformer: epistasis detection by genome language model and dual-channel network. *Genome Biology* (2026). https://doi.org/10.1186/s13059-026-04268-8
-
-- Paper: https://link.springer.com/article/10.1186/s13059-026-04268-8
-- DOI: https://doi.org/10.1186/s13059-026-04268-8
-
----
-
 ### Contact
-
-- **Issues / Bugs**: please submit via repository Issues (include error logs, commands, environment info, and reproduction steps).
 - **Email**: `<zhangxiaowei2118@gmail.com>`
-- **Paper**: https://link.springer.com/article/10.1186/s13059-026-04268-8

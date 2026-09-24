@@ -22,7 +22,7 @@ def set_seed(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
+    
 def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser")
     parser.add_argument('--phe', type=str, default='', help='Dataset name')
@@ -42,7 +42,7 @@ def parse_args():
 
 
 def load_data(args):
-    args.data_dir = os.path.join("data/data_zeamap/", args.phe)
+    args.data_dir = os.path.join("demo_data/data_zeamap/", args.phe)
 
     if args.phe=='KW/':
         yData = pd.read_csv(args.data_dir + "yData.csv", sep=',', header=None, index_col=0)
@@ -135,9 +135,10 @@ class CNN_self_attention(nn.Module):
 class LearnablePositionalEncoding(nn.Module):
     def __init__(self, embed_dim, max_len=10000):
         super(LearnablePositionalEncoding, self).__init__()
-        self.pos_embedding = nn.Parameter(torch.randn(1, max_len, embed_dim))
+        self.pos_embedding = nn.Parameter(torch.randn(max_len, 1, embed_dim))
+
     def forward(self, x):
-        return x + self.pos_embedding[:, :x.size(1), :]
+        return x + self.pos_embedding[:x.size(0), :, :]
 
 class TransformerBlock(nn.Module):
     def __init__(self, embed_dim, num_heads, hidden_dim, dropout):
@@ -221,7 +222,7 @@ class Epiformer(nn.Module):
         super().__init__()
         self.nsnp = nsnp
         self.MCNN = CNN_self_attention(num_attention_heads=4, input_size=nsnp, hidden_size=512, output_dim=1, attention_probs_dropout_prob=0.1)
-        self.SNP_interaction = SNPInteractionAttention(input_dim=1, embed_dim=512, num_heads=4, hidden_dim=64, dropout=0.1, max_len = 1000, num_layers=4)
+        self.SNP_interaction = SNPInteractionAttention(input_dim=1, embed_dim=512, num_heads=4, hidden_dim=64, dropout=0.1, max_len=nsnp, num_layers=4)
         self.CrossGatedMLP = CrossGatedMLP(input_dim=self.nsnp, hidden_dim=self.nsnp)
         self.MLP = nn.Sequential(   
             nn.Linear(self.nsnp, 128),

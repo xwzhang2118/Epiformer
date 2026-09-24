@@ -27,7 +27,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser")
     parser.add_argument('--phe', type=str, default='KW', help='Dataset name (e.g., KW)')
     parser.add_argument('--runIndex', type=str, default='index1', help='Run index')
-    parser.add_argument('--data_dir', type=str, default='', help='Path to phenotype directory (defaults to <project_root>/data/data_zeamap/<phe>/)')
+    parser.add_argument('--data_dir', type=str, default='', help='Path to phenotype directory (defaults to <project_root>/demo_data/data_zeamap/<phe>/)')
     parser.add_argument('--result_dir', type=str, default='', help='Path to result directory (defaults to <project_root>/result/<phe>/)')
     parser.add_argument('--result_dir_base', type=str, default='', help='Base path to result directory')
     parser.add_argument('--result_directory_name', type=str, default='KW', help='Result directory name')
@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size')
     parser.add_argument('--epochs', type=int, default=100, help='Number of epochs')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
-    parser.add_argument('--early_stop_patience', type=int, default=30, help='Early stopping patience')
+    parser.add_argument('--early_stop_patience', type=int, default=10, help='Early stopping patience')
     args = parser.parse_args()
     return args
 
@@ -46,7 +46,7 @@ def load_data(args):
     if args.data_dir:
         args.data_dir = args.data_dir
     else:
-        args.data_dir = os.path.join(project_root, "data", "data_zeamap", phe)
+        args.data_dir = os.path.join(project_root, "demo_data", "data_zeamap", phe)
     if not args.data_dir.endswith(os.sep):
         args.data_dir += os.sep
 
@@ -144,14 +144,15 @@ class CNN_self_attention(nn.Module):
 class LearnablePositionalEncoding(nn.Module):
     def __init__(self, embed_dim, max_len=10000):
         super(LearnablePositionalEncoding, self).__init__()
-        self.pos_embedding = nn.Parameter(torch.randn(1, max_len, embed_dim))
+        self.pos_embedding = nn.Parameter(torch.randn(max_len, 1, embed_dim))
+
     def forward(self, x):
-        return x + self.pos_embedding[:, :x.size(1), :]
+        return x + self.pos_embedding[:x.size(0), :, :]
 
 class TransformerBlock(nn.Module):
     def __init__(self, embed_dim, num_heads, hidden_dim, dropout):
         super(TransformerBlock, self).__init__()
-        self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=False)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.dropout1 = nn.Dropout(dropout)
 
@@ -164,7 +165,7 @@ class TransformerBlock(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
 
     def forward(self, x):
-        attn_output, attn_weights  = self.attention(x, x, x, need_weights=True)
+        attn_output, attn_weights  = self.attention(x, x, x, need_weights=False)
         x = self.norm1(x + self.dropout1(attn_output))
         ffn_output = self.ffn(x)
         x = self.norm2(x + self.dropout2(ffn_output))
@@ -230,7 +231,7 @@ class Epiformer(nn.Module):
         super().__init__()
         self.nsnp = nsnp
         self.MCNN = CNN_self_attention(num_attention_heads=4, input_size=nsnp, hidden_size=512, output_dim=1, attention_probs_dropout_prob=0.1)
-        self.SNP_interaction = SNPInteractionAttention(input_dim=1, embed_dim=512, num_heads=4, hidden_dim=64, dropout=0.1, max_len = 1000, num_layers=4)
+        self.SNP_interaction = SNPInteractionAttention(input_dim=1, embed_dim=512, num_heads=4, hidden_dim=64, dropout=0.1, max_len =nsnp, num_layers=4)
         self.CrossGatedMLP = CrossGatedMLP(input_dim=self.nsnp, hidden_dim=self.nsnp)
         self.MLP = nn.Sequential(   
             nn.Linear(self.nsnp, 128),
