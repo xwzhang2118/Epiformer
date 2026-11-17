@@ -1,10 +1,6 @@
 # Epiformer
 
-<<<<<<< HEAD
-Epiformer is a PyTorch-based deep learning framework for **epistasis detection** and **phenotype prediction**. It builds an end-to-end regression model (`Epiformer`) by combining:
-=======
 Epiformer is a PyTorch-based deep learning framework for **epistasis detection** and **phenotype prediction**. It builds a regression model (`Epiformer`) by combining:
->>>>>>> Update public training docs and scripts for HKW data layout.
 
 - Multi-scale CNN + self-attention (`CNN_self_attention`)
 - SNP interaction Transformer (`SNPInteractionAttention`)
