@@ -42,7 +42,7 @@ def parse_args():
 
 
 def load_data(args):
-    args.data_dir = os.path.join("demo_data/data_zeamap/", args.phe)
+    args.data_dir = os.path.join("data/data_zeamap/", args.phe)
 
     if args.phe=='KW/':
         yData = pd.read_csv(args.data_dir + "yData.csv", sep=',', header=None, index_col=0)

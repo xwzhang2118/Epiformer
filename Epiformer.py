@@ -27,7 +27,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser")
     parser.add_argument('--phe', type=str, default='KW', help='Dataset name (e.g., KW)')
     parser.add_argument('--runIndex', type=str, default='index1', help='Run index')
-    parser.add_argument('--data_dir', type=str, default='', help='Path to phenotype directory (defaults to <project_root>/demo_data/data_zeamap/<phe>/)')
+    parser.add_argument('--data_dir', type=str, default='', help='Path to phenotype directory (defaults to <project_root>/data/data_zeamap/<phe>/)')
     parser.add_argument('--result_dir', type=str, default='', help='Path to result directory (defaults to <project_root>/result/<phe>/)')
     parser.add_argument('--result_dir_base', type=str, default='', help='Base path to result directory')
     parser.add_argument('--result_directory_name', type=str, default='KW', help='Result directory name')
@@ -46,7 +46,7 @@ def load_data(args):
     if args.data_dir:
         args.data_dir = args.data_dir
     else:
-        args.data_dir = os.path.join(project_root, "demo_data", "data_zeamap", phe)
+        args.data_dir = os.path.join(project_root, "data", "data_zeamap", phe)
     if not args.data_dir.endswith(os.sep):
         args.data_dir += os.sep
 

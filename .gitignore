@@ -1,8 +1,13 @@
-## Data artifacts (do not commit)
-/demo_data/data_zeamap/KW/embeddings.pkl
-
-# Optional: ignore all phenotype embeddings files
+## Data artifacts (do not commit large binaries)
 /demo_data/data_zeamap/*/embeddings.pkl
+/data/data_zeamap/*/embeddings.pkl
+/data/data_zeamap/**/*.npy
+*.npy
+
+## Local / bulky paths
+.vscode/
+Paper/
+result/**/*.pth
 
 ## Python cache files (do not commit)
 __pycache__/

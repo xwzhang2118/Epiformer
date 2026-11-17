@@ -1,6 +1,10 @@
 # Epiformer
 
+<<<<<<< HEAD
 Epiformer is a PyTorch-based deep learning framework for **epistasis detection** and **phenotype prediction**. It builds an end-to-end regression model (`Epiformer`) by combining:
+=======
+Epiformer is a PyTorch-based deep learning framework for **epistasis detection** and **phenotype prediction**. It builds a regression model (`Epiformer`) by combining:
+>>>>>>> Update public training docs and scripts for HKW data layout.
 
 - Multi-scale CNN + self-attention (`CNN_self_attention`)
 - SNP interaction Transformer (`SNPInteractionAttention`)
@@ -14,16 +18,23 @@ Epiformer is a PyTorch-based deep learning framework for **epistasis detection**
 
 ### Project files
 
-- `Epiformer.py`  
-  Main training script. Runs 5-fold cross-validation, selects and saves the best model by PCC (Pearson correlation coefficient).
+- `Epiformer.py` (**legacy / direct compression**)  
+  Original pipeline. It concatenates embedding + genotype + SNP annotation, then applies an early compression projection (`F → 256 → 1`) before training.  
+  To better preserve multimodal SNP information, we later refined this into the updated training version below.
 
-- `singleloci_ importance.py`  
+- `Epiformer_frozen_training.py` (**updated training script**)  
+  A refined training protocol that learns fold-wise supervised fusion before freezing it for backbone training, aiming to better preserve multimodal SNP information than direct early compression.  
+  Per fold: supervise-pretrain a fusion MLP → **freeze** it → train the Epiformer backbone → save checkpoints by validation PCC.
+
+- `Base_MLP.py` (**simple baseline**)  
+  A dosage-only MLP baseline for phenotype prediction. It reads `genotype_dosage.npy` `(N, P)`, runs 5-fold CV with per-fold standardization, and reports `PCC / MAE`.  
+  Default MLP width is `1024-512-256-128` with dropout. Useful as a lightweight reference against Epiformer.
+
+- `singleloci_importance.py`  
   Extracts single-locus (per-SNP) importance scores (from the `CNN_self_attention` branch) and exports averaged feature weights.
 
 - `attention_weight_epi.py`  
   Extracts SNP–SNP interaction attention matrices (from the Transformer branch) and exports an averaged attention matrix.
-
----
 
 ### Environment setup
 
@@ -45,18 +56,34 @@ pip install torch numpy pandas scikit-learn
 
 ### Data preparation
 
-By default, scripts read data from the following directory (relative to the project root):
+Phenotype-specific inputs live under:
 
-`demo_data/data_zeamap/<phe>/`
+`data/data_zeamap/<phe>/`
 
-where `<phe>` is the phenotype name (e.g., `KW`). The directory should contain at least:
+The provided example is **HKW**:
 
-- `genotype_encoded.npy`
-- `embeddings.pkl`
-- `SNP_annotation.csv`
-- `yData.csv`
+`data/data_zeamap/HKW/`
 
-> Dataset download link / DOI: (https://doi.org/10.6084/m9.figshare.30448166)
+#### Files in `data/data_zeamap/HKW/`
+
+| File | Shape / size | Description |
+| --- | --- | --- |
+| `genotype_dosage.npy` | `(450, 26081)` float32 | Allele dosage matrix (samples × SNPs) |
+| `genotype_encoded.npy` | `(450, 26081, 8)` float32 | One-hot / encoded genotype tensor (samples × SNPs × channels) |
+| `SNP_annotation.csv` | `(26081, 13)` | Per-SNP annotation features (numeric) |
+| `yData.csv` | `(450, 2)` | Sample index + phenotype value |
+
+Notes:
+
+- **N = 450** samples, **P = 26,081** LD-pruned SNPs.
+- `embeddings.pkl` is **not** shipped in this folder. Training scripts that concatenate contextual embeddings expect you to generate it locally (see FAQ) and place it in the same phenotype directory before running.
+- Prefer passing an explicit data path, e.g. `--data_dir data/data_zeamap/HKW`.
+
+> Dataset download link / DOI: https://doi.org/10.6084/m9.figshare.30448166
+
+#### Genotype processing (source of the SNP set)
+
+The genotype inputs were derived from maize SNP data through a standard processing pipeline: quality control (missingness and MAF filtering), followed by LD pruning to obtain a reduced marker set. The resulting pruned SNPs (**26,081** markers) underlie `genotype_encoded.npy`, `genotype_dosage.npy`, and `SNP_annotation.csv`.
 
 ---
 
@@ -70,41 +97,30 @@ where `<phe>` is the phenotype name (e.g., `KW`). The directory should contain a
 ### Train the model
 
 ```bash
-python Epiformer.py --phe KW
+# Updated frozen-training protocol on HKW
+python Epiformer_frozen_training.py --phe HKW --data_dir data/data_zeamap/HKW
+
+# Legacy direct-compression pipeline
+python Epiformer.py --phe HKW --data_dir data/data_zeamap/HKW
+
+# Dosage-only MLP baseline
+python Base_MLP.py --phe HKW --data_dir data/data_zeamap/HKW
 ```
-
-`Epiformer.py` supports CLI arguments. If `--data_dir/--result_dir` are not provided, it uses:
-
-- Data dir: `<project_root>/demo_data/data_zeamap/<phe>/`
-- Result dir: `<project_root>/result/<phe>/`
-
-#### Training procedure (`Epiformer.py`)
-
-1. Load and concatenate multi-source features (embedding + genotype + SNP annotation).
-2. Reduce feature dimension with a small MLP and apply standardization.
-3. Train `Epiformer` with 5-fold cross-validation.
-4. For each epoch, compute:
-   - `Train Loss` (MSE)
-   - `Test Loss` (MSE)
-   - `PCC`
-   - `MAE`
-5. If PCC improves for a fold, save the best model:
-   - `all_best_model_fold_<k>.pth`
-6. Use Early Stopping (default patience=30) based on PCC.
 
 #### Results
 
 - Prints best `PCC / MAE` for each fold
-- Prints the final 5-fold average: `Average PCC ± std` and `Average MAE ± std`
-- Saves best models (per fold) to:
-  - `result/<phe>/all_best_model_fold_<k>.pth`
+- Prints the final 5-fold average: `PCC ± std` and `MAE ± std`
+- Saves per-fold files to `result/<phe>/` (Epiformer) or `result/Base_MLP/<phe>/` (baseline):
+  - `all_best_model_fold_<k>.pth`
+  - `fold_<k>_best_preds.csv`
 
 ---
 
-### Extract single-locus importance 
+### Extract single-locus importance
 
 ```bash
-python "singleloci_ importance.py"
+python singleloci_importance.py
 ```
 
 #### What it does
@@ -115,7 +131,7 @@ python "singleloci_ importance.py"
 
 #### Default inputs/outputs (current script behavior)
 
-**Important**: `singleloci_ importance.py` currently hard-codes the following in `main`:
+**Important**: `singleloci_importance.py` currently hard-codes the following in `main`:
 
 - `args.phe = "KW/"`
 - `args.result_dir = "result/KW"`
@@ -162,7 +178,7 @@ Default output file:
    A fixed seed is set (`set_seed(42)`), but small variations may still occur across hardware / library versions.
 
 3. **SNP contextual embeddings (Evo 2)**  
-   Due to differences across experimental environments, we recommend that users use **Evo 2** to re-embed the contextual sequence around each SNP (typically 10 bp upstream and 10 bp downstream, plus the SNP itself), then save the resulting embeddings as `embeddings.pkl` under `demo_data/data_zeamap/<phe>/` before training or inference.
+   `data/data_zeamap/HKW/` currently provides genotype and annotation files, but not `embeddings.pkl`. Due to differences across experimental environments, we recommend that users use **Evo 2** to re-embed the contextual sequence around each SNP (typically 10 bp upstream and 10 bp downstream, plus the SNP itself), then save the resulting embeddings as `embeddings.pkl` under `data/data_zeamap/<phe>/` before running embedding-based training or inference.
 
 ---
 
