@@ -73,7 +73,7 @@ Notes:
 
 - **N = 450** samples, **P = 26,081** LD-pruned SNPs.
 - `genotype_encoded.npy` is large (~360 MB) and is **not** included in the GitHub repository (GitHub file-size limit). Please download it from the dataset link below and place it under `data/data_zeamap/HKW/` before training. The same applies to `genotype_dosage.npy` if you need the Base_MLP baseline.
-- `embeddings.pkl` is **not** shipped in this folder. Training scripts that concatenate contextual embeddings expect you to generate it locally (see FAQ) and place it in the same phenotype directory before running.
+- `embeddings.pkl` is also **not** included in the GitHub repository. Generate it locally with Evo 2 (see FAQ) and place it under `data/data_zeamap/HKW/` before running embedding-based training.
 - Prefer passing an explicit data path, e.g. `--data_dir data/data_zeamap/HKW`.
 
 > Dataset download link / DOI: https://doi.org/10.6084/m9.figshare.30448166
